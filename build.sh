@@ -251,22 +251,26 @@ function zipping() {
         echo -e "***********************************************$nocol"
         sha1sum out/$FINAL_ZIP
 
-        # Github release
-        read -p "Do you want to do a github release? If unsure, say N. (Y/N) " GIT_RESP 
-        case $GIT_RESP in
+    # Github release
+    if [ "$GITHUB_ACTIONS" = "true" ]; then
+	echo "Detected GitHub Actions, auto-uploading release..."
+    	gh release create "$VERSION" "out/$FINAL_ZIP" --repo "$RELEASE_REPO" --title "Meteoric-$VERSION"
+    else
+    	read -p "Do you want to do a github release? If unsure, say N. (Y/N) " GIT_RESP 
+    	case $GIT_RESP in
             [yY] )
-                gh release create $VERSION out/$FINAL_ZIP --repo $RELEASE_REPO --title Meteoric-$VERSION
-                ;;
+            	gh release create "$VERSION" "out/$FINAL_ZIP" --repo "$RELEASE_REPO" --title "Meteoric-$VERSION"
+            	;;
             *)
-                read -p "Do you want to upload files to the current github release? If unsure, say N. (Y/N) " UPLOAD_RESP 
-                case $UPLOAD_RESP in
+            	read -p "Do you want to upload files to the current github release? If unsure, say N. (Y/N) " UPLOAD_RESP 
+            	case $UPLOAD_RESP in
                     [yY] )
-                        gh release upload $VERSION out/$FINAL_ZIP --repo $RELEASE_REPO
-                        ;;
-                esac
-                ;;
-        esac
-
+                    	gh release upload "$VERSION" "out/$FINAL_ZIP" --repo "$RELEASE_REPO"
+                    	;;
+            	esac	
+            	;;
+    	esac
+    fi
         echo -e "$cyan***********************************************"
         echo    "                  All done !!                  "
         echo -e "***********************************************$nocol"
